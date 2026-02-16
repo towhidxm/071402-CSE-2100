@@ -1,0 +1,115 @@
+
+ 1. CODE FORMATTING ISSUES
+============================================================
+
+The current code does not fully follow standard formatting rules:
+
+-   Indentation is not fully consistent.
+-   Some lines exceed 80 characters.
+-   Multiple variable declarations appear on the same line.
+-   Some variables are not declared at the beginning of blocks.
+-   Some variables are not initialized at the time of declaration.
+
+ 
+2.INSUFFICIENT COMMENTING
+============================================================
+
+The following types of comments are missing:
+
+A. File-Level Comment The file does not contain a structured header
+comment including: - File name 
+
+B. Function Descriptive Blocks Functions do not contain descriptive
+block comments explaining: - Purpose of the function - Parameters -
+Return value - Internal logic overview
+
+C. Inline Comments Complex logic such as: - Registry enumeration -
+Memory allocation - Auto refresh mechanism is not properly explained.
+
+
+ 3. SOLID PRINCIPLES NOT APPLIED
+============================================================
+
+Single Responsibility Principle is violated.
+
+Currently, one file handles: - UI creation - Windows Registry API
+access - Event handling - Auto-refresh logic - Resource cleanup
+
+These responsibilities should be separated into different modules.
+
+ 
+4. MVC ARCHITECTURE NOT IMPLEMENTED
+============================================================
+
+The project does not follow Model-View-Controller structure.
+
+Expected separation:
+
+Model: - Registry data access logic
+
+View: - GTK UI components
+
+Controller: - Signal handlers and interaction logic
+
+Currently, everything is mixed in one file.
+
+ 5. DESIGN PATTERN NOT USED
+============================================================
+
+Facade Pattern is not implemented.
+
+The UI directly calls Windows Registry API functions like: -
+RegEnumKeyExW - RegEnumValueW
+
+Instead, a separate abstraction layer (registry_facade.c) should handle
+these calls.
+
+6. FILE AND FOLDER STRUCTURE MISSING
+============================================================
+
+The project does not follow a modular folder structure.
+
+Expected structure:
+
+RegistryViewer/ │ ├── src/ ├── include/ ├── docs/ ├── tests/ └──
+README.md
+
+Currently, all logic exists in a single source file.
+
+7. VERSION CONTROL STRATEGY NOT PRESENT
+============================================================
+
+There is no evidence of: - Git repository usage - Branch management -
+Structured commit messages
+
+
+8.TEST-DRIVEN DEVELOPMENT NOT APPLIED
+============================================================
+
+There are no test files or unit tests.
+
+Missing: - Test cases for registry functions - Edge case testing -
+Invalid key handling tests
+
+ 
+9.INCOMPLETE DOCUMENTATION
+============================================================
+
+The following documentation is missing:
+
+-   README.md
+-   Build instructions
+-   Dependency list
+-   Architecture diagram (MVC)
+-   Sequence diagram
+-   User manual
+
+10. PROJECT MANAGEMENT EVIDENCE MISSING
+============================================================
+
+The course requires:
+
+-   3-member group collaboration
+-   Task division
+-   Project management tool usage (e.g., Trello)
+
