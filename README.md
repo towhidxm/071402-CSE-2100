@@ -11,9 +11,9 @@
 | Architecture | MVC + Facade Pattern                    |
 | Version      | 1.0.0                                   |
 | Date         | 2026-02-17                              |
-| Author       | \<Your Name\>                           |
-| Course       | \<Course Name\>                         |
-| University   | \<University Name\>                     |
+| Author       | \<TOWHID AL MAHMUD & ABIR KHAN SIAM\>                           |
+| Course       | \<0714 02 CSE 2100\>                         |
+| University   | \<Khulna University\>                     |
 
 > *CONFIDENTIAL – FOR ACADEMIC USE ONLY*
 
