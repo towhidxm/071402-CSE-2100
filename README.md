@@ -11,9 +11,9 @@
 | Architecture | MVC + Facade Pattern                    |
 | Version      | 1.0.0                                   |
 | Date         | 2026-02-17                              |
-| Author       | \<TOWHID AL MAHMUD & ABIR KHAN SIAM\>                           |
-| Course       | \<0714 02 CSE 2100\>                         |
-| University   | \<Khulna University\>                     |
+| Author       | \<TOWHID AL MAHMUD & ABIR KHAN SIAM\>   |
+| Course       | \<0714 02 CSE 2100\>                    |
+| University   | \<Khulna University\>                   |
 
 > *CONFIDENTIAL – FOR ACADEMIC USE ONLY*
 
@@ -45,7 +45,7 @@ The application follows a layered MVC + Facade architecture. Each layer has a si
                             │
 ┌───────────────────────────▼─────────────────────────────┐
 │                 CONTROLLER LAYER                        │
-│         registry_controller.c / registry_view.c        │
+│         registry_controller.c / registry_view.c         │
 │  • GTK signal handlers (on_selection_changed, etc.)     │
 │  • Auto-refresh timer management                        │
 │  • Widget construction & layout (View sub-layer)        │
@@ -61,16 +61,16 @@ The application follows a layered MVC + Facade architecture. Each layer has a si
              │
 ┌────────────▼────────────────────────────────────────────┐
 │                  FACADE LAYER                           │
-│               registry_facade.c                        │
-│  • registry_open_key()    • registry_enum_subkeys()    │
-│  • registry_enum_values() • registry_close_key()       │
-│  • All Win32 RegXxx() calls isolated here              │
+│               registry_facade.c                         │
+│  • registry_open_key()    • registry_enum_subkeys()     │
+│  • registry_enum_values() • registry_close_key()        │
+│  • All Win32 RegXxx() calls isolated here               │
 └────────────┬────────────────────────────────────────────┘
              │
 ┌────────────▼────────────────────────────────────────────┐
 │              WINDOWS REGISTRY API (Win32)               │
 │    RegOpenKeyExW  RegEnumKeyExW  RegEnumValueW etc.     │
-│                   (READ-ONLY ACCESS)                   │
+│                   (READ-ONLY ACCESS)                    │
 └─────────────────────────────────────────────────────────┘
 ```
 
