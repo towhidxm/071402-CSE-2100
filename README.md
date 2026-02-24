@@ -611,4 +611,3 @@ The `CMakeLists.txt` enables maximum warning levels. The project must compile wi
 
 ---
 
-*End of Technical Design Document — Windows Registry Viewer v1.0.0*
