@@ -4,8 +4,7 @@
 - **Course Code**: 0714 02 CSE 2100  
 - **Course Title**: Advanced Programming Laboratory  
 - **Project**: Windows Registry Viewer — Read‑Only Refactoring Journey  
-- **Students**: Sakib08 & AbuSaeed22  
-- **Session**: 0714‑02  
+- **Students**: TOWHID AL MAHMUD & ABIR KHAN SIAM 
 - **Date**: February 2026  
 
 ---
