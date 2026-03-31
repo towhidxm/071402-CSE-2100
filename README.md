@@ -694,7 +694,8 @@ Do not introduce registry write capabilities.
 ## Part H — License & Contact
 
 - **License**: MIT (see `LICENSE` file)
-- **Authors**: TOWHID AL MAHMUD & ABIR KHAN SIAM 
+- **Course Teacher:** Prof. Dr. Kazi Masudul Alom
+- **Authors**: TOWHID AL MAHMUD & ABIR KHAN SIAM
 - **Course**: CSE 2100 – Advanced Programming Laboratory  
 
 This Registry Viewer is designed as a companion project to your **Windows Event Viewer** refactoring journey, following the same architectural discipline but applied to a different Windows subsystem.
