@@ -1,10 +1,156 @@
-# Registry Viewer (SOLID Refactor)
+# Windows Registry Viewer — Java SOLID Implementation
 
-## Overview
-This project is a Java (Swing) refactor of a procedural registry-viewer style application.  
-The codebase is organized with object-oriented design and SOLID principles so it stays modular, extensible, and maintainable.
+Project: Windows Registry Viewer Refactoring Journey  
+Course: Advanced Programming Laboratory 
+Date: March 2026  
+Students: TOWHID AL MAHMUD & ABIR KHAN SIAM
 
-## Prompt Used (as requested)
+## Table of Contents
+- Part A — Project Overview
+- Part B — Build & Usage
+- Part C — Architecture & Design
+- Part D — Refactoring Documentation
+- Part E — Appendices
+
+---
+
+## PART A — PROJECT OVERVIEW
+
+### 1. Introduction
+This project is a Windows Registry Viewer desktop application built in Java (Swing).  
+It was refactored from a procedural mindset into a modular Object-Oriented Design using SOLID principles.
+
+### What This Application Does
+- Browse root hives (`HKEY_CLASSES_ROOT`, `HKEY_CURRENT_USER`, etc.)
+- Expand registry keys lazily from tree navigation
+- Display selected key values in a sortable table format
+- Auto-refresh value panel at a configurable interval
+- Keep read-only behavior for safe inspection
+
+### 2. Project Version (Current)
+This repository currently contains one SOLID-focused Java implementation.
+
+#### Characteristics
+- Clean package-based structure
+- Interface-driven design (`RegistryReadService`, `RegistryValueDisplayFormatter`, view contracts)
+- Controller + coordinator separation for SRP
+- JNA integration for Windows registry read access
+- JavaDoc-covered key classes and interfaces
+
+### 3. Technology Stack
+| Component | Technology | Purpose |
+|---|---|---|
+| Language | Java (JDK 11+) | Core implementation |
+| UI | Swing | Desktop interface |
+| Windows Integration | JNA + Advapi32 | Registry API access |
+| Build | Makefile + javac | Compilation and run tasks |
+| Platform | Windows | Target OS |
+
+### 4. Repository Structure
+```text
+registryviewer_SOLID/
+├── Main.java
+├── app/
+│   ├── RegistryController.java
+│   ├── RegistryTreeCoordinator.java
+│   ├── DefaultRegistryTreeCoordinator.java
+│   ├── RegistryValueCoordinator.java
+│   └── DefaultRegistryValueCoordinator.java
+├── config/
+│   └── AppConstants.java
+├── domain/
+│   ├── RootHive.java
+│   ├── RegistryKeyNode.java
+│   └── RegistryValueRecord.java
+├── registry/
+│   ├── RegistryReadService.java
+│   ├── JnaRegistryReadService.java
+│   ├── RegistryValueDisplayFormatter.java
+│   ├── DefaultRegistryValueDisplayFormatter.java
+│   └── RegistryAccessException.java
+└── ui/
+    ├── RegistryView.java
+    ├── RegistryTreeView.java
+    └── RegistryViewerFrame.java
+```
+
+---
+
+## PART B — BUILD & USAGE
+
+### 5. Build Requirements
+- Windows 10/11
+- JDK 11 or later
+- JNA jars in `lib/`:
+  - `jna-*.jar`
+  - `jna-platform-*.jar`
+- Optional: `make` command (or run `javac` manually)
+
+### 6. Compilation Instructions
+If `make` is available:
+```sh
+make build
+```
+
+If `make` is not available, compile manually from project root:
+```powershell
+New-Item -ItemType Directory -Force -Path build | Out-Null
+$src = Get-ChildItem -Path registryviewer_SOLID -Recurse -Filter *.java | ForEach-Object { $_.FullName }
+$jna = (Get-ChildItem lib\jna*.jar | Select-Object -First 1).FullName
+$jnap = (Get-ChildItem lib\jna-platform*.jar | Select-Object -First 1).FullName
+javac -encoding UTF-8 -d build -cp "build;$jna;$jnap" $src
+```
+
+### 7. Running the Application
+Using `make`:
+```sh
+make run
+```
+
+Manual run:
+```powershell
+$jna = (Get-ChildItem lib\jna*.jar | Select-Object -First 1).FullName
+$jnap = (Get-ChildItem lib\jna-platform*.jar | Select-Object -First 1).FullName
+java -cp "build;$jna;$jnap" org.example.registryviewer.Main
+```
+
+### 8. Troubleshooting
+- `make` not found: use manual `javac`/`java` commands above.
+- JNA jar missing: place both JNA jars inside `lib/`.
+- Non-Windows launch: app exits by design (Windows-only).
+
+---
+
+## PART C — ARCHITECTURE & DESIGN
+
+### 9. Layered View
+```text
+Main (composition root)
+   -> app (controller + coordinators)
+      -> ui (view contracts + Swing frame)
+      -> registry (read service + format strategy)
+      -> domain (immutable/value models)
+```
+
+### 10. SOLID Principles Analysis
+- **SRP:** `RegistryController` handles UI events; tree loading and value loading are delegated to dedicated coordinators.
+- **OCP:** New data sources or formatters can be added by implementing interfaces without changing controller flow.
+- **LSP:** Any `RegistryReadService` or `RegistryValueDisplayFormatter` implementation can replace defaults.
+- **ISP:** Small interfaces (`RegistryView`, `RegistryTreeView`, `RegistryTreeCoordinator`, `RegistryValueCoordinator`) keep contracts focused.
+- **DIP:** High-level app logic depends on interfaces, while `Main` wires concrete implementations.
+
+### 11. Package Responsibility Mapping
+- `domain`: pure data models
+- `registry`: Windows registry data access + value formatting policies
+- `ui`: Swing view and view contracts
+- `app`: orchestration and application logic
+- `config`: static configuration/constants
+
+---
+
+## PART D — REFACTORING DOCUMENTATION
+
+### 12. Prompt Used for This Refactor
 ```text
 Prompt: Refactoring a C Project into a Java-Based SOLID Object-Oriented Design
 
@@ -25,68 +171,34 @@ How SOLID principles are applied
 How to run the project
 ```
 
-## Project Structure
-```text
-registryviewer_SOLID/
-  Main.java
-  app/
-    RegistryController.java
-    RegistryTreeCoordinator.java
-    DefaultRegistryTreeCoordinator.java
-    RegistryValueCoordinator.java
-    DefaultRegistryValueCoordinator.java
-  config/
-    AppConstants.java
-  domain/                        # model layer
-    RootHive.java
-    RegistryKeyNode.java
-    RegistryValueRecord.java
-  registry/                      # service/repository boundary for registry I/O
-    RegistryReadService.java
-    JnaRegistryReadService.java
-    RegistryValueDisplayFormatter.java
-    DefaultRegistryValueDisplayFormatter.java
-    RegistryAccessException.java
-  ui/                            # interface/presentation layer
-    RegistryView.java
-    RegistryTreeView.java
-    RegistryViewerFrame.java
-```
+### 13. Key Refactoring Changes
+- Introduced coordinator abstractions for tree and value workflows.
+- Kept UI rendering separate from registry I/O concerns.
+- Preserved extension points with interfaces for service and formatter.
+- Improved JavaDoc in key contracts and implementations.
 
-## How SOLID Is Applied
-- **SRP:** UI layout, controller orchestration, tree-loading logic, and value-formatting logic are separated into focused classes.
-- **OCP:** `RegistryReadService`, `RegistryValueDisplayFormatter`, `RegistryTreeCoordinator`, and `RegistryValueCoordinator` are extension points.
-- **LSP:** Implementations (`JnaRegistryReadService`, default coordinators/formatter) can replace their interfaces without caller changes.
-- **ISP:** Small, purpose-specific interfaces (`RegistryView`, `RegistryTreeView`, `RegistryReadService`) avoid one large "god" contract.
-- **DIP:** High-level flow depends on abstractions and receives concrete implementations from composition root (`Main`).
+### 14. Lessons Learned
+- Interface-first design made refactoring safer.
+- Splitting responsibilities reduced controller complexity.
+- Windows-specific logic is best isolated in registry service implementations.
 
-## JavaDoc Status
-Core classes and interfaces contain JavaDoc comments describing responsibilities and key methods/constructors.
+---
 
-## Prerequisites
-- Windows
-- Java Development Kit (JDK) 11+
-- GNU Make
-- JNA jars in `lib/`
+## PART E — APPENDICES
 
-## Setup
-Place these jars in the repo-root `lib/` folder:
-- `lib/jna-*.jar`
-- `lib/jna-platform-*.jar`
+### 15. Dependency Flow Verification
+- UI depends on view contracts and app controller only.
+- Controller depends on abstractions, not JNA implementation details.
+- Registry implementation depends on JNA/Windows API wrappers.
+- No circular dependencies across packages.
 
-## Build
-```sh
-make build
-```
+### 16. Contact
+- **Student 1:** TOWHID AL MAHMUD
+- **Student 2:** ABIR KHAN SIAM
+- **Course:** 0714 02 CSE 2100 — Advanced Programming Laboratory
 
-## Run
-```sh
-make run
-```
-Entry point: `org.example.registryviewer.Main`
+---
 
-## Clean
-```sh
-make clean
-```
+## License
+This project is licensed under the MIT License. See the `LICENSE` file.
 
