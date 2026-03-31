@@ -2,9 +2,9 @@
 
 **Project:** Windows Registry Viewer Refactoring Journey  
 **Course Code:** 0714 02 CSE 2100  
-**Course Title:** Advanced Programming Laboratory  
-**Students:** Sakib08 & AbuSaeed22  
-**Session:** 0714-02  
+**Course Title:** Advanced Programming Laboratory 
+**Course Teacher:** Prof. Dr. Kazi Masudul Alam
+**Students:** TOWHID AL MAHMUD & ABIR KHAN SIAM
 **Date:** February 2026
 
 ---
