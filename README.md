@@ -1,6 +1,6 @@
 # Windows Registry Viewer — Java SOLID Implementation
 
-Project: Windows Registry Viewer Refactoring Journey  
+Project: Windows Registry Viewer Refactoring 
 Course: Advanced Programming Laboratory 
 Date: March 2026  
 Students: TOWHID AL MAHMUD & ABIR KHAN SIAM
@@ -150,25 +150,34 @@ Main (composition root)
 
 ## PART D — REFACTORING DOCUMENTATION
 
-### 12. Prompt Used for This Refactor
+### 12. Prompts Used (Step-by-Step)
+
+#### Step 1 — Initial Conversion Prompt
 ```text
-Prompt: Refactoring a C Project into a Java-Based SOLID Object-Oriented Design
+Convert the existing procedural C project into Java using object-oriented design.
+Use classes, objects, encapsulation, inheritance, and polymorphism where appropriate.
+```
 
-Refactor an existing C project into a Java-based Object-Oriented Design (OOD) system by applying SOLID principles. Follow the steps below:
+#### Step 2 — SOLID Refactoring Prompt
+```text
+Refactor the Java code by applying SOLID principles:
+SRP: one responsibility per class,
+OCP: open for extension, closed for modification,
+LSP: implementations should be substitutable,
+ISP: prefer small focused interfaces,
+DIP: depend on abstractions, not concrete classes.
+```
 
-Convert the procedural C code into Java, following object-oriented design practices (classes, objects, encapsulation, inheritance, polymorphism).
-While refactoring, apply the following SOLID principles:
-SRP (Single Responsibility Principle): Each class should have only one responsibility.
-OCP (Open/Closed Principle): Design classes so they are open for extension but closed for modification.
-LSP (Liskov Substitution Principle): Subclasses should be replaceable for their base classes without affecting correctness.
-ISP (Interface Segregation Principle): Use multiple small, specific interfaces instead of large, general ones.
-DIP (Dependency Inversion Principle): Depend on abstractions (interfaces), not concrete implementations.
-Organize the project into proper packages (e.g., model, service, repository, interface).
-Ensure the code is modular, scalable, and maintainable.
-Add proper JavaDoc comments and a README.md explaining:
-Project structure
-How SOLID principles are applied
-How to run the project
+#### Step 3 — Package Organization Prompt
+```text
+Organize the project into maintainable packages such as model/domain, service/repository,
+application/controller, and interface/ui layers.
+```
+
+#### Step 4 — Documentation Prompt
+```text
+Add proper JavaDoc comments across major classes and interfaces.
+Create a README.md describing project structure, SOLID application, and run instructions.
 ```
 
 ### 13. Key Refactoring Changes
@@ -198,7 +207,4 @@ How to run the project
 - **Course:** 0714 02 CSE 2100 — Advanced Programming Laboratory
 
 ---
-
-## License
-This project is licensed under the MIT License. See the `LICENSE` file.
 
