@@ -7,16 +7,16 @@ Students: TOWHID AL MAHMUD & ABIR KHAN SIAM
 
 ---
 
-##  Download & Run (No build required)
+## ⬇️ Download & Run (No build required)
 
 > **Just want to run the app? Download the `.exe` below — no Java or build tools needed.**
 
-[![Download EXE](https://img.shields.io/badge/Download-.exe-blue?style=for-the-badge&logo=windows)](https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest/download/RegistryViewer.exe)
+[![Download EXE](https://img.shields.io/badge/Download-.exe-blue?style=for-the-badge&logo=windows)](https://github.com/towhidxm/071402-CSE-2100/releases/latest/download/RegistryViewer.exe)
 
-Or go to the [**Releases page**](https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest) and download `RegistryViewer.exe`.
+Or go to the [**Releases page**](https://github.com/towhidxm/071402-CSE-2100/releases/latest) and download `RegistryViewer.exe`.
 
->  **Windows only** — this app reads the Windows Registry via JNA.  
->  Windows SmartScreen may warn on first run — click "More info → Run anyway".
+> ⚠️ **Windows only** — this app reads the Windows Registry via JNA.  
+> ⚠️ Windows SmartScreen may warn on first run — click "More info → Run anyway".
 
 ### Quick steps:
 1. Download `RegistryViewer.exe`
