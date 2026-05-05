@@ -1,0 +1,96 @@
+name: Build and Release EXE
+
+on:
+  push:
+    tags:
+      - 'v*'          # trigger on: git tag v1.0.0 && git push --tags
+  workflow_dispatch:   # also allows manual trigger from GitHub UI
+
+jobs:
+  build:
+    runs-on: windows-latest   # must be Windows to use jpackage + JNA
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Download JNA jars
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path lib | Out-Null
+          Invoke-WebRequest -Uri "https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.14.0/jna-5.14.0.jar" `
+            -OutFile "lib\jna-5.14.0.jar" -UseBasicParsing
+          Invoke-WebRequest -Uri "https://repo1.maven.org/maven2/net/java/dev/jna/jna-platform/5.14.0/jna-platform-5.14.0.jar" `
+            -OutFile "lib\jna-platform-5.14.0.jar" -UseBasicParsing
+          Write-Host "JNA jars downloaded."
+
+      - name: Compile Java sources
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path build | Out-Null
+          $sources = Get-ChildItem -Path MVC -Recurse -Filter "*.java" | ForEach-Object { $_.FullName }
+          $cp = "build;lib\jna-5.14.0.jar;lib\jna-platform-5.14.0.jar"
+          javac -encoding UTF-8 -d build -cp $cp $sources
+          Write-Host "Compiled $($sources.Count) files."
+
+      - name: Create fat JAR
+        shell: powershell
+        run: |
+          # Write manifest
+          "Manifest-Version: 1.0`r`nMain-Class: org.example.registryviewer.Main`r`n" | `
+            Set-Content MANIFEST.MF -Encoding ASCII
+          # Extract JNA into build dir (fat JAR)
+          Push-Location build
+          jar xf "..\lib\jna-5.14.0.jar"
+          jar xf "..\lib\jna-platform-5.14.0.jar"
+          Pop-Location
+          jar cfm RegistryViewer.jar MANIFEST.MF -C build .
+          Write-Host "JAR created."
+
+      - name: Build EXE with jpackage
+        shell: powershell
+        run: |
+          if (Test-Path dist) { Remove-Item -Recurse -Force dist }
+          jpackage `
+            --input . `
+            --name "RegistryViewer" `
+            --main-jar "RegistryViewer.jar" `
+            --main-class "org.example.registryviewer.Main" `
+            --type exe `
+            --dest dist `
+            --app-version "1.0.0" `
+            --description "Windows Registry Viewer — SOLID + MVC" `
+            --vendor "CSE-2100" `
+            --win-console
+          Write-Host "EXE built."
+          Get-ChildItem dist
+
+      - name: Upload EXE as release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
+          name: "Registry Viewer ${{ github.ref_name }}"
+          body: |
+            ## Windows Registry Viewer — Enhanced Edition
+
+            ### New in this release
+            - Filter/search values in real time
+            - Dark mode
+            - Bookmarks for favourite keys
+            - Right-click copy (name, data, full row)
+            - Export to CSV
+
+            ### How to install
+            1. Download `RegistryViewer-1.0.0.exe` below
+            2. Run it — no Java installation needed
+            3. Windows SmartScreen may appear: click **More info → Run anyway**
+
+            > Windows 10/11 only
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

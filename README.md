@@ -5,6 +5,26 @@ Course: Advanced Programming Laboratory
 Date: March 2026  
 Students: TOWHID AL MAHMUD & ABIR KHAN SIAM
 
+---
+
+##  Download & Run (No build required)
+
+> **Just want to run the app? Download the `.exe` below — no Java or build tools needed.**
+
+[![Download EXE](https://img.shields.io/badge/Download-.exe-blue?style=for-the-badge&logo=windows)](https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest/download/RegistryViewer.exe)
+
+Or go to the [**Releases page**](https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest) and download `RegistryViewer.exe`.
+
+>  **Windows only** — this app reads the Windows Registry via JNA.  
+>  Windows SmartScreen may warn on first run — click "More info → Run anyway".
+
+### Quick steps:
+1. Download `RegistryViewer.exe`
+2. Double-click to run
+3. Browse registry keys in the left panel, values appear on the right
+
+---
+
 ## Table of Contents
 - Part A — Project Overview
 - Part B — Build & Usage
