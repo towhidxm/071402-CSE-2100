@@ -1,7 +1,7 @@
-# Windows Registry Viewer — Java SOLID Implementation
+# Windows Registry Viewer — Java SOLID + MVC Implementation
 
-Project: Windows Registry Viewer Refactoring 
-Course: Advanced Programming Laboratory 
+Project: Windows Registry Viewer Refactoring  
+Course: Advanced Programming Laboratory  
 Date: March 2026  
 Students: TOWHID AL MAHMUD & ABIR KHAN SIAM
 
@@ -18,7 +18,7 @@ Students: TOWHID AL MAHMUD & ABIR KHAN SIAM
 
 ### 1. Introduction
 This project is a Windows Registry Viewer desktop application built in Java (Swing).  
-It was refactored from a procedural mindset into a modular Object-Oriented Design using SOLID principles.
+It was refactored from a procedural mindset into a modular Object-Oriented Design applying both **SOLID principles** and the **MVC (Model-View-Controller)** architectural pattern.
 
 ### What This Application Does
 - Browse root hives (`HKEY_CLASSES_ROOT`, `HKEY_CURRENT_USER`, etc.)
@@ -28,10 +28,10 @@ It was refactored from a procedural mindset into a modular Object-Oriented Desig
 - Keep read-only behavior for safe inspection
 
 ### 2. Project Version (Current)
-This repository currently contains one SOLID-focused Java implementation.
+This repository contains one SOLID + MVC focused Java implementation.
 
 #### Characteristics
-- Clean package-based structure
+- Clean package-based structure aligned to MVC layers
 - Interface-driven design (`RegistryReadService`, `RegistryValueDisplayFormatter`, view contracts)
 - Controller + coordinator separation for SRP
 - JNA integration for Windows registry read access
@@ -49,8 +49,8 @@ This repository currently contains one SOLID-focused Java implementation.
 ### 4. Repository Structure
 ```text
 registryviewer_SOLID/
-├── Main.java
-├── app/
+├── Main.java                               ← Composition root (wires MVC)
+├── app/                                    ← CONTROLLER layer
 │   ├── RegistryController.java
 │   ├── RegistryTreeCoordinator.java
 │   ├── DefaultRegistryTreeCoordinator.java
@@ -58,17 +58,17 @@ registryviewer_SOLID/
 │   └── DefaultRegistryValueCoordinator.java
 ├── config/
 │   └── AppConstants.java
-├── domain/
+├── domain/                                 ← MODEL layer (data)
 │   ├── RootHive.java
 │   ├── RegistryKeyNode.java
 │   └── RegistryValueRecord.java
-├── registry/
+├── registry/                               ← MODEL layer (data access)
 │   ├── RegistryReadService.java
 │   ├── JnaRegistryReadService.java
 │   ├── RegistryValueDisplayFormatter.java
 │   ├── DefaultRegistryValueDisplayFormatter.java
 │   └── RegistryAccessException.java
-└── ui/
+└── ui/                                     ← VIEW layer
     ├── RegistryView.java
     ├── RegistryTreeView.java
     └── RegistryViewerFrame.java
@@ -117,22 +117,91 @@ java -cp "build;$jna;$jnap" org.example.registryviewer.Main
 ### 8. Troubleshooting
 - `make` not found: use manual `javac`/`java` commands above.
 - JNA jar missing: place both JNA jars inside `lib/`.
-- Non-Windows launch: app exits by design (Windows-only).
+- Non-Windows launch: app exits by design (Windows-only). `Main.java` checks `os.name` and calls `System.exit(1)` on non-Windows systems.
 
 ---
 
 ## PART C — ARCHITECTURE & DESIGN
 
-### 9. Layered View
-```text
-Main (composition root)
-   -> app (controller + coordinators)
-      -> ui (view contracts + Swing frame)
-      -> registry (read service + format strategy)
-      -> domain (immutable/value models)
+### 9. MVC Architecture
+
+This project implements the **Model-View-Controller (MVC)** pattern across its package structure. Each layer has a clearly defined responsibility and communicates through interfaces, not concrete types.
+
+#### MVC Layer Mapping
+
+| MVC Layer | Packages | Key Classes |
+|---|---|---|
+| **Model** | `domain/`, `registry/` | `RegistryKeyNode`, `RegistryValueRecord`, `RootHive`, `RegistryReadService`, `JnaRegistryReadService`, `RegistryValueDisplayFormatter` |
+| **View** | `ui/` | `RegistryView` (interface), `RegistryTreeView` (interface), `RegistryViewerFrame` (Swing impl) |
+| **Controller** | `app/` | `RegistryController`, `DefaultRegistryTreeCoordinator`, `DefaultRegistryValueCoordinator` |
+
+#### Model
+The Model is split into two sub-packages:
+
+- **`domain/`** — pure, immutable data objects. `RegistryKeyNode` represents a tree node, `RegistryValueRecord` is an immutable row for the value table, and `RootHive` is an enum of the five standard registry roots. None of these classes know anything about Swing or registry access.
+- **`registry/`** — data-access and formatting logic. `RegistryReadService` is a read-only interface for Windows registry operations. `JnaRegistryReadService` implements it using JNA/Advapi32. `RegistryValueDisplayFormatter` converts raw `Map<String, Object>` values into typed display records. `RegistryAccessException` wraps Win32 errors so callers do not depend on JNA exception types.
+
+#### View
+The View layer uses **interface-driven contracts** so the controller never depends on Swing directly:
+
+- `RegistryView` — base interface exposing `setStatus()`, `getKeyTree()`, and `getValueTableModel()`.
+- `RegistryTreeView` — extends `RegistryView` with tree model access and the auto-refresh toggle control.
+- `RegistryViewerFrame` — the concrete Swing `JFrame` implementing both interfaces. It contains only layout code — no registry calls, no business logic.
+
+#### Controller
+The Controller layer handles all user-driven events and delegates to coordinators:
+
+- `RegistryController` — implements `TreeSelectionListener` and `TreeExpansionListener`. Receives UI events, calls the appropriate coordinator, and updates the view's status. It never touches raw registry handles or Swing internals directly.
+- `RegistryTreeCoordinator` / `DefaultRegistryTreeCoordinator` — responsible for populating root hives and lazy-loading child nodes on tree expansion.
+- `RegistryValueCoordinator` / `DefaultRegistryValueCoordinator` — responsible for reading values for the selected key, formatting them, and pushing rows into the view's table model.
+
+#### Wiring (Composition Root)
+`Main.java` acts as the composition root. It creates one instance of each concrete class and wires them together:
+
+```java
+RegistryViewerFrame frame = new RegistryViewerFrame();
+RegistryController controller = new RegistryController(
+    frame,
+    new JnaRegistryReadService(),
+    new DefaultRegistryValueDisplayFormatter()
+);
+controller.initialize();
 ```
 
-### 10. UML Class Diagram
+No class other than `Main` holds references to concrete implementations — all internal references are to interfaces.
+
+#### MVC Data Flow
+
+```
+User action (click / expand)
+        │
+        ▼
+  RegistryController          ← Controller receives Swing events
+        │
+   ┌────┴────┐
+   ▼         ▼
+TreeCoord  ValueCoord         ← Coordinators call the Model
+        │
+        ▼
+  RegistryReadService          ← Model reads Windows registry
+        │
+        ▼
+  RegistryValueRecord          ← Model produces data objects
+        │
+        ▼
+  RegistryViewerFrame          ← View renders result
+```
+
+### 10. Layered View
+```text
+Main (composition root)
+   └─> app (controller + coordinators)
+         ├─> ui (view contracts + Swing frame)
+         ├─> registry (read service + format strategy)
+         └─> domain (immutable value models)
+```
+
+### 11. UML Class Diagram
 
 ```mermaid
 classDiagram
@@ -149,7 +218,7 @@ classDiagram
         +ROOT_HIVES : String[]
     }
 
-    %% ── Domain ───────────────────────────────────────────────────
+    %% ── Domain (Model) ───────────────────────────────────────────
     class RootHive {
         -name : String
         -handle : long
@@ -173,7 +242,7 @@ classDiagram
         +getData() byte[]
     }
 
-    %% ── Registry (interfaces) ────────────────────────────────────
+    %% ── Registry (Model — interfaces) ───────────────────────────
     class RegistryReadService {
         <<interface>>
         +listSubKeys(node: RegistryKeyNode) List~String~
@@ -185,7 +254,7 @@ classDiagram
         +format(record: RegistryValueRecord) String
     }
 
-    %% ── Registry (implementations) ───────────────────────────────
+    %% ── Registry (Model — implementations) ──────────────────────
     class JnaRegistryReadService {
         +listSubKeys(node: RegistryKeyNode) List~String~
         +listValues(node: RegistryKeyNode) List~RegistryValueRecord~
@@ -200,7 +269,7 @@ classDiagram
         +RegistryAccessException(message: String, cause: Throwable)
     }
 
-    %% ── UI (interfaces / contracts) ──────────────────────────────
+    %% ── UI (View — interfaces) ───────────────────────────────────
     class RegistryView {
         <<interface>>
         +setStatusMessage(msg: String) void
@@ -213,7 +282,7 @@ classDiagram
         +appendChildNodes(parent: RegistryKeyNode, children: List~String~) void
     }
 
-    %% ── UI (implementation) ──────────────────────────────────────
+    %% ── UI (View — implementation) ───────────────────────────────
     class RegistryViewerFrame {
         -treePanel : JTree
         -valueTable : JTable
@@ -224,7 +293,7 @@ classDiagram
         +setValueRecords(records: List~RegistryValueRecord~) void
     }
 
-    %% ── App (interfaces) ─────────────────────────────────────────
+    %% ── App (Controller — interfaces) ────────────────────────────
     class RegistryTreeCoordinator {
         <<interface>>
         +loadRootHives() void
@@ -238,7 +307,7 @@ classDiagram
         +stopAutoRefresh() void
     }
 
-    %% ── App (implementations) ────────────────────────────────────
+    %% ── App (Controller — implementations) ───────────────────────
     class DefaultRegistryTreeCoordinator {
         -readService : RegistryReadService
         -treeView : RegistryTreeView
@@ -265,7 +334,6 @@ classDiagram
 
     %% ── Relationships ────────────────────────────────────────────
 
-    %% Entry point wires everything
     Main ..> RegistryController : creates
     Main ..> DefaultRegistryTreeCoordinator : creates
     Main ..> DefaultRegistryValueCoordinator : creates
@@ -273,56 +341,50 @@ classDiagram
     Main ..> DefaultRegistryValueDisplayFormatter : creates
     Main ..> RegistryViewerFrame : creates
 
-    %% Controller depends on coordinator interfaces (DIP)
     RegistryController --> RegistryTreeCoordinator : uses
     RegistryController --> RegistryValueCoordinator : uses
 
-    %% Default coordinators implement interfaces (LSP)
     DefaultRegistryTreeCoordinator ..|> RegistryTreeCoordinator
     DefaultRegistryValueCoordinator ..|> RegistryValueCoordinator
 
-    %% Coordinators depend on service interfaces (DIP)
     DefaultRegistryTreeCoordinator --> RegistryReadService : uses
     DefaultRegistryTreeCoordinator --> RegistryTreeView : uses
     DefaultRegistryValueCoordinator --> RegistryReadService : uses
     DefaultRegistryValueCoordinator --> RegistryValueDisplayFormatter : uses
     DefaultRegistryValueCoordinator --> RegistryView : uses
 
-    %% Concrete implementations satisfy interfaces (LSP)
     JnaRegistryReadService ..|> RegistryReadService
     DefaultRegistryValueDisplayFormatter ..|> RegistryValueDisplayFormatter
     RegistryViewerFrame ..|> RegistryView
     RegistryViewerFrame ..|> RegistryTreeView
 
-    %% Domain model associations
     RegistryKeyNode --> RootHive : belongs to
     RegistryReadService ..> RegistryKeyNode : uses
     RegistryReadService ..> RegistryValueRecord : produces
     RegistryValueDisplayFormatter ..> RegistryValueRecord : formats
 
-    %% Exception thrown by registry service
     JnaRegistryReadService ..> RegistryAccessException : throws
 ```
 
-### 11. SOLID Principles Analysis
+### 12. SOLID Principles Analysis
 - **SRP:** `RegistryController` handles UI events; tree loading and value loading are delegated to dedicated coordinators.
 - **OCP:** New data sources or formatters can be added by implementing interfaces without changing controller flow.
-- **LSP:** Any `RegistryReadService` or `RegistryValueDisplayFormatter` implementation can replace defaults.
+- **LSP:** Any `RegistryReadService` or `RegistryValueDisplayFormatter` implementation can replace the defaults transparently.
 - **ISP:** Small interfaces (`RegistryView`, `RegistryTreeView`, `RegistryTreeCoordinator`, `RegistryValueCoordinator`) keep contracts focused.
-- **DIP:** High-level app logic depends on interfaces, while `Main` wires concrete implementations.
+- **DIP:** High-level app logic depends on interfaces; `Main` wires concrete implementations at startup.
 
-### 12. Package Responsibility Mapping
-- `domain`: pure data models
-- `registry`: Windows registry data access + value formatting policies
-- `ui`: Swing view and view contracts
-- `app`: orchestration and application logic
+### 13. Package Responsibility Mapping
+- `domain`: pure immutable data models (Model)
+- `registry`: Windows registry data access + value formatting policies (Model)
+- `ui`: Swing view and view contracts (View)
+- `app`: orchestration and application logic (Controller)
 - `config`: static configuration/constants
 
 ---
 
 ## PART D — REFACTORING DOCUMENTATION
 
-### 13. Prompts Used (Step-by-Step)
+### 14. Prompts Used (Step-by-Step)
 
 #### Step 1 — Initial Conversion Prompt
 ```text
@@ -340,40 +402,53 @@ ISP: prefer small focused interfaces,
 DIP: depend on abstractions, not concrete classes.
 ```
 
-#### Step 3 — Package Organization Prompt
+#### Step 3 — MVC Architecture Prompt
+```text
+Organize the project into MVC layers:
+Model: domain data objects and registry read service,
+View: Swing frame implementing view interfaces,
+Controller: RegistryController and coordinator classes handling user events.
+Main.java should be the only composition root that wires concrete implementations.
+```
+
+#### Step 4 — Package Organization Prompt
 ```text
 Organize the project into maintainable packages such as model/domain, service/repository,
 application/controller, and interface/ui layers.
 ```
 
-#### Step 4 — Documentation Prompt
+#### Step 5 — Documentation Prompt
 ```text
 Add proper JavaDoc comments across major classes and interfaces.
-Create a README.md describing project structure, SOLID application, and run instructions.
+Create a README.md describing project structure, MVC pattern, SOLID application, and run instructions.
 ```
 
-### 14. Key Refactoring Changes
-- Introduced coordinator abstractions for tree and value workflows.
-- Kept UI rendering separate from registry I/O concerns.
-- Preserved extension points with interfaces for service and formatter.
+### 15. Key Refactoring Changes
+- Applied MVC pattern: separated Model (`domain/`, `registry/`), View (`ui/`), and Controller (`app/`) into distinct packages.
+- Introduced coordinator abstractions for tree and value workflows to preserve SRP in the controller.
+- Kept UI rendering fully separate from registry I/O concerns.
+- Preserved extension points with interfaces for service and formatter (OCP + DIP).
+- `Main.java` acts as the sole composition root — all other classes depend only on interfaces.
 - Improved JavaDoc in key contracts and implementations.
 
-### 15. Lessons Learned
-- Interface-first design made refactoring safer.
+### 16. Lessons Learned
+- MVC + SOLID reinforce each other: MVC defines *where* responsibilities live, SOLID defines *how* each piece is designed internally.
+- Interface-first design made refactoring safer and the controller testable in isolation.
 - Splitting responsibilities reduced controller complexity.
-- Windows-specific logic is best isolated in registry service implementations.
+- Windows-specific logic is best isolated in registry service implementations, making the rest of the code platform-neutral.
 
 ---
 
 ## PART E — APPENDICES
 
-### 16. Dependency Flow Verification
+### 17. Dependency Flow Verification
 - UI depends on view contracts and app controller only.
 - Controller depends on abstractions, not JNA implementation details.
 - Registry implementation depends on JNA/Windows API wrappers.
 - No circular dependencies across packages.
+- `Main.java` is the only class that imports both concrete and interface types — by design.
 
-### 17. Contact
+### 18. Contact
 - **Student 1:** TOWHID AL MAHMUD
 - **Student 2:** ABIR KHAN SIAM
 - **Course:** 0714 02 CSE 2100 — Advanced Programming Laboratory

@@ -1,0 +1,17 @@
+# Build outputs
+/build/
+/target/
+
+# Local dependency cache folder used in manual setup
+/lib/
+
+# JVM crash/replay logs
+hs_err_pid*.log
+replay_pid*.log
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml

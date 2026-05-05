@@ -1,4 +1,4 @@
-SRC_DIR := registryviewer_SOLID
+SRC_DIR := .
 BIN_DIR := build
 LIB_DIR := lib
 
