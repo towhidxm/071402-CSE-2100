@@ -13,8 +13,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: _MVC_
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -44,10 +42,8 @@ jobs:
       - name: Create fat JAR
         shell: powershell
         run: |
-          # Write manifest
           "Manifest-Version: 1.0`r`nMain-Class: org.example.registryviewer.Main`r`n" | `
             Set-Content MANIFEST.MF -Encoding ASCII
-          # Extract JNA into build dir (fat JAR)
           Push-Location build
           jar xf "..\lib\jna-5.14.0.jar"
           jar xf "..\lib\jna-platform-5.14.0.jar"
@@ -66,8 +62,7 @@ jobs:
             --main-class "org.example.registryviewer.Main" `
             --type exe `
             --dest dist `
-            --app-version "1.0.0" `
-            --description "Windows Registry Viewer — SOLID + MVC" `
+            --description "Windows Registry Viewer - SOLID + MVC" `
             --vendor "CSE-2100" `
             --win-console
           Write-Host "EXE built."
@@ -76,22 +71,30 @@ jobs:
       - name: Upload EXE as release asset
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.exe
+          files: dist/RegistryViewer*.exe
           name: "Registry Viewer ${{ github.ref_name }}"
           body: |
-            ## Windows Registry Viewer — Enhanced Edition
+            ## Windows Registry Viewer - SOLID + MVC
 
-            ### New in this release
-            - Filter/search values in real time
-            - Dark mode
+            A Java Swing desktop app to browse the Windows Registry.
+            Built with SOLID principles and MVC architecture.
+
+            ### Features
+            - Browse all registry hives (HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, etc.)
+            - Lazy tree expansion for fast navigation
+            - Sortable value table (Name / Type / Data)
+            - Real-time search/filter on values
+            - Auto-refresh at configurable interval
+            - Dark mode toggle
             - Bookmarks for favourite keys
-            - Right-click copy (name, data, full row)
-            - Export to CSV
+            - Right-click copy (name, data, or full row)
+            - Export visible values to CSV
+            - Read-only, no registry modifications
 
             ### How to install
-            1. Download `RegistryViewer-1.0.0.exe` below
-            2. Run it — no Java installation needed
-            3. Windows SmartScreen may appear: click **More info → Run anyway**
+            1. Download `RegistryViewer.exe` below
+            2. Run it, no Java installation needed
+            3. Windows SmartScreen may appear: click **More info then Run anyway**
 
             > Windows 10/11 only
         env:

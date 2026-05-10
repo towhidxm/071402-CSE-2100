@@ -45,15 +45,19 @@ public final class DefaultRegistryTreeCoordinator implements RegistryTreeCoordin
         try {
             List<String> children = registryReadService.listSubkeyNames(parentHkey);
             for (String childName : children) {
+                HKEY childHkey = null;
                 try {
-                    HKEY childHkey = registryReadService.openChildReadOnly(parentHkey, childName);
+                    childHkey = registryReadService.openChildReadOnly(parentHkey, childName);
                     String fullPath = data.getFullPath() + "\\" + childName;
                     DefaultMutableTreeNode child = new DefaultMutableTreeNode(
                             RegistryKeyNode.realKey(childName, fullPath, childHkey));
                     child.add(new DefaultMutableTreeNode(RegistryKeyNode.placeholderChild()));
                     node.add(child);
                 } catch (RegistryAccessException ignored) {
-                    // Keep behavior: silently skip keys we cannot open.
+                    // Silently skip keys we cannot open.
+                    if (childHkey != null) {
+                        try { registryReadService.releaseKey(childHkey); } catch (RegistryAccessException ignored2) { }
+                    }
                 }
             }
         } catch (RegistryAccessException ex) {

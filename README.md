@@ -2,7 +2,7 @@
 
 Project: Windows Registry Viewer Refactoring  
 Course: Advanced Programming Laboratory  
-Date: March 2026  
+Date: May 2026  
 Students: TOWHID AL MAHMUD & ABIR KHAN SIAM
 
 ---
@@ -19,9 +19,10 @@ Or go to the [**Releases page**](https://github.com/towhidxm/071402-CSE-2100/rel
 > ⚠️ Windows SmartScreen may warn on first run — click "More info → Run anyway".
 
 ### Quick steps:
-1. Download `RegistryViewer.exe`
-2. Double-click to run
-3. Browse registry keys in the left panel, values appear on the right
+1. Go to the [Releases page](https://github.com/towhidxm/071402-CSE-2100/releases/latest)
+2. Download `RegistryViewer.exe`
+3. Double-click to run
+4. Browse registry keys in the left panel, values appear on the right
 
 ---
 
@@ -68,7 +69,7 @@ This repository contains one SOLID + MVC focused Java implementation.
 
 ### 4. Repository Structure
 ```text
-registryviewer_SOLID/
+MVC/
 ├── Main.java                               ← Composition root (wires MVC)
 ├── app/                                    ← CONTROLLER layer
 │   ├── RegistryController.java
@@ -82,6 +83,8 @@ registryviewer_SOLID/
 │   ├── RootHive.java
 │   ├── RegistryKeyNode.java
 │   └── RegistryValueRecord.java
+├── model/                                  ← MODEL layer (session state)
+│   └── RegistrySessionModel.java
 ├── registry/                               ← MODEL layer (data access)
 │   ├── RegistryReadService.java
 │   ├── JnaRegistryReadService.java
@@ -115,7 +118,7 @@ make build
 If `make` is not available, compile manually from project root:
 ```powershell
 New-Item -ItemType Directory -Force -Path build | Out-Null
-$src = Get-ChildItem -Path registryviewer_SOLID -Recurse -Filter *.java | ForEach-Object { $_.FullName }
+$src = Get-ChildItem -Path MVC -Recurse -Filter *.java | ForEach-Object { $_.FullName }
 $jna = (Get-ChildItem lib\jna*.jar | Select-Object -First 1).FullName
 $jnap = (Get-ChildItem lib\jna-platform*.jar | Select-Object -First 1).FullName
 javac -encoding UTF-8 -d build -cp "build;$jna;$jnap" $src
@@ -151,7 +154,7 @@ This project implements the **Model-View-Controller (MVC)** pattern across its p
 
 | MVC Layer | Packages | Key Classes |
 |---|---|---|
-| **Model** | `domain/`, `registry/` | `RegistryKeyNode`, `RegistryValueRecord`, `RootHive`, `RegistryReadService`, `JnaRegistryReadService`, `RegistryValueDisplayFormatter` |
+| **Model** | `domain/`, `model/`, `registry/` | `RegistryKeyNode`, `RegistryValueRecord`, `RootHive`, `RegistrySessionModel`, `RegistryReadService`, `JnaRegistryReadService`, `RegistryValueDisplayFormatter` |
 | **View** | `ui/` | `RegistryView` (interface), `RegistryTreeView` (interface), `RegistryViewerFrame` (Swing impl) |
 | **Controller** | `app/` | `RegistryController`, `DefaultRegistryTreeCoordinator`, `DefaultRegistryValueCoordinator` |
 
@@ -395,6 +398,7 @@ classDiagram
 
 ### 13. Package Responsibility Mapping
 - `domain`: pure immutable data models (Model)
+- `model`: application session state — selected key, auto-refresh flag (Model)
 - `registry`: Windows registry data access + value formatting policies (Model)
 - `ui`: Swing view and view contracts (View)
 - `app`: orchestration and application logic (Controller)
