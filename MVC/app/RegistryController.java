@@ -98,7 +98,7 @@ public final class RegistryController implements TreeSelectionListener, TreeExpa
         }
 
         // Only populate if the node still has a single "Loading..." placeholder child.
-        if (node.getChildCount() == 0) {
+        if (node.getChildCount() != 1) {
             return;
         }
 
